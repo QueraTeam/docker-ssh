@@ -25,11 +25,11 @@ jobs:
         with:
           context: server
           push: true
-          tags: ghcr.io/QueraTeam/docker-ssh-tunnel/server:latest
+          tags: ghcr.io/querateam/docker-ssh-tunnel/server:latest
 
       - name: Build and push the client image
         uses: docker/build-push-action@v6
         with:
           context: client
           push: true
-          tags: ghcr.io/QueraTeam/docker-ssh-tunnel/client:latest
+          tags: ghcr.io/querateam/docker-ssh-tunnel/client:latest
