@@ -5,8 +5,8 @@ between two containers on different servers.
 
 ## Images
 
-- `docker-ssh-tunnel/server`
-- `docker-ssh-tunnel/client`
+- `ghcr.io/querateam/docker-ssh-tunnel/server`
+- `ghcr.io/querateam/docker-ssh-tunnel/client`
 
 ## Configuration
 
@@ -89,7 +89,7 @@ docker run --name tunnel-server --rm -it --init \
   -e CLIENT_AUTHORIZED_KEYS="$KEY2_PUB" \
   -p 2222:22 \
   -p 127.0.0.1:4444:4444 \
-  docker-ssh-tunnel/server
+  ghcr.io/querateam/docker-ssh-tunnel/server
 ```
 
 ```shell
@@ -101,7 +101,7 @@ docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:
   -e SERVER_HOST="host.docker.internal" \
   -e SERVER_PORT="2222" \
   -e PORT_FORWARDING_RULE="-R 0.0.0.0:4444:127.0.0.1:6666" \
-  docker-ssh-tunnel/client
+  ghcr.io/querateam/docker-ssh-tunnel/client
 ```
 
 Test the tunnel using `nc`:
@@ -116,7 +116,7 @@ nc 127.0.0.1 4444
 ```yaml
 services:
   tunnel-server:
-    image: docker-ssh-tunnel/server
+    image: ghcr.io/querateam/docker-ssh-tunnel/server
     restart: always
     environment:
       SERVER_ED25519_PRIVATE_KEY_BASE64: ... value of key1.base64 ...
@@ -126,7 +126,7 @@ services:
       - 127.0.0.1:4444:4444
 
   tunnel-client:
-    image: docker-ssh-tunnel/client
+    image: ghcr.io/querateam/docker-ssh-tunnel/client
     restart: always
     environment:
       SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
