@@ -23,30 +23,30 @@ Main variables:
   The client public keys authorized to connect as `tunnel` user.
   The keys should be separated by semicolons (`;`).
 
-Optional parameters for `sshd_config`:
+Optional parameters for [`sshd_config(5)`](https://linux.die.net/man/5/sshd_config):
 
-| Environment Variable                 | Default Value     |
-| ------------------------------------ | ----------------- |
-| `SSHD_PORT`                          | `22`              |
-| `SSHD_PERMIT_ROOT_LOGIN`             | `no`              |
-| `SSHD_PERMIT_EMPTY_PASSWORDS`        | `no`              |
-| `SSHD_PASSWORD_AUTHENTICATION`       | `no`              |
-| `SSHD_AUTHENTICATION_METHODS`        | `publickey`       |
-| `SSHD_CLIENT_ALIVE_INTERVAL`         | `10`              |
-| `SSHD_CLIENT_ALIVE_COUNT_MAX`        | `30`              |
-| `SSHD_LOGIN_GRACE_TIME`              | `30`              |
-| `SSHD_GATEWAY_PORTS`                 | `clientspecified` |
-| `SSHD_PERMIT_TUNNEL`                 | `no`              |
-| `SSHD_PERMIT_TTY`                    | `no`              |
-| `SSHD_PERMIT_USER_RC`                | `no`              |
-| `SSHD_PERMIT_OPEN`                   | -                 |
-| `SSHD_PERMIT_LISTEN`                 | -                 |
-| `SSHD_ALLOW_TCP_FORWARDING`          | `remote`          |
-| `SSHD_ALLOW_STREAM_LOCAL_FORWARDING` | `no`              |
-| `SSHD_X11_FORWARDING`                | `no`              |
-| `SSHD_ALLOW_AGENT_FORWARDING`        | `no`              |
-| `SSHD_FORCE_COMMAND`                 | `/sbin/nologin`   |
-| `SSHD_ALLOW_USERS`                   | `tunnel`          |
+| Environment Variable                 | Equivalent sshd Argument   | Default Value     |
+| ------------------------------------ | -------------------------- | ----------------- |
+| `SSHD_PORT`                          | Port                       | `22`              |
+| `SSHD_PERMIT_ROOT_LOGIN`             | PermitRootLogin            | `no`              |
+| `SSHD_PERMIT_EMPTY_PASSWORDS`        | PermitEmptyPasswords       | `no`              |
+| `SSHD_PASSWORD_AUTHENTICATION`       | PasswordAuthentication     | `no`              |
+| `SSHD_AUTHENTICATION_METHODS`        | AuthenticationMethods      | `publickey`       |
+| `SSHD_CLIENT_ALIVE_INTERVAL`         | ClientAliveInterval        | `10`              |
+| `SSHD_CLIENT_ALIVE_COUNT_MAX`        | ClientAliveCountMax        | `30`              |
+| `SSHD_LOGIN_GRACE_TIME`              | LoginGraceTime             | `30`              |
+| `SSHD_GATEWAY_PORTS`                 | GatewayPorts               | `clientspecified` |
+| `SSHD_PERMIT_TUNNEL`                 | PermitTunnel               | `no`              |
+| `SSHD_PERMIT_TTY`                    | PermitTTY                  | `no`              |
+| `SSHD_PERMIT_USER_RC`                | PermitUserRC               | `no`              |
+| `SSHD_PERMIT_OPEN`                   | PermitOpen                 | -                 |
+| `SSHD_PERMIT_LISTEN`                 | PermitListen               | -                 |
+| `SSHD_ALLOW_TCP_FORWARDING`          | AllowTcpForwarding         | `remote`          |
+| `SSHD_ALLOW_STREAM_LOCAL_FORWARDING` | AllowStreamLocalForwarding | `no`              |
+| `SSHD_X11_FORWARDING`                | X11Forwarding              | `no`              |
+| `SSHD_ALLOW_AGENT_FORWARDING`        | AllowAgentForwarding       | `no`              |
+| `SSHD_FORCE_COMMAND`                 | ForceCommand               | `/sbin/nologin`   |
+| `SSHD_ALLOW_USERS`                   | AllowUsers                 | `tunnel`          |
 
 ### Client image
 
