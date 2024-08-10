@@ -7,7 +7,7 @@ between two containers on different servers.
 ## Server image
 
 ```shell
-$ docker pull ghcr.io/querateam/docker-ssh-tunnel/server
+docker pull ghcr.io/querateam/docker-ssh-tunnel/server
 ```
 
 The following environment variables are supported in the server image.
@@ -50,7 +50,7 @@ For more information, see the [`sshd_config(5)`](https://linux.die.net/man/5/ssh
 ## Client image
 
 ```shell
-$ docker pull ghcr.io/querateam/docker-ssh-tunnel/client
+docker pull ghcr.io/querateam/docker-ssh-tunnel/client
 ```
 
 The client image uses `autossh` to establish a persistent SSH tunnel.
@@ -144,8 +144,8 @@ docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:
 Test the tunnel using `nc`:
 
 ```shell
-$ docker exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
-$ nc 127.0.0.1 4444
+docker exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
+nc 127.0.0.1 4444
 ```
 
 ## Docker compose example
@@ -178,6 +178,6 @@ services:
 Test the tunnel using `nc`:
 
 ```shell
-$ docker compose exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
-$ nc 127.0.0.1 4444
+docker compose exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
+nc 127.0.0.1 4444
 ```
