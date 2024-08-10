@@ -9,16 +9,14 @@ fi
 mkdir -p $HOME/.ssh
 chmod 700 $HOME/.ssh
 
-if [ -z "$SERVER_HOST" ]; then
-    echo "SERVER_HOST is not set. Exiting..."
-    exit 1
-fi
-if [ -z "$SERVER_PORT" ]; then
-    echo "SERVER_PORT is not set. Exiting..."
+if [ -z "$SSH_HOSTNAME" ]; then
+    echo "SSH_HOSTNAME is not set. Exiting..."
     exit 1
 fi
 
-# Configure private key
+################################
+# setup keys                   #
+################################
 if [ -z "$CLIENT_ED25519_PRIVATE_KEY_BASE64" ]; then
     echo "CLIENT_ED25519_PRIVATE_KEY_BASE64 is not set. Exiting..."
     exit 1
@@ -27,19 +25,34 @@ else
     chmod 600 $HOME/.ssh/id_ed25519
 fi
 
-# Configure known_hosts
 if [ -z "$SERVER_ED25519_PUBLIC_KEY" ]; then
     echo "SERVER_ED25519_PUBLIC_KEY is not set. Exiting..."
     exit 1
 else
-    echo "[$SERVER_HOST]:$SERVER_PORT $SERVER_ED25519_PUBLIC_KEY" >$HOME/.ssh/known_hosts
+    echo "[$SSH_HOSTNAME]:${SSH_PORT:-22} $SERVER_ED25519_PUBLIC_KEY" >$HOME/.ssh/known_hosts
     chmod 600 $HOME/.ssh/known_hosts
 fi
 
-chown -R tunnel:tunnel $HOME/.ssh
+################################
+# ssh_config options           #
+################################
+printf "\
+Port ${SSH_PORT:-22}
+User tunnel
+ServerAliveInterval ${SSH_SERVER_ALIVE_INTERVAL:-10}
+ServerAliveCountMax ${SSH_SERVER_ALIVE_COUNT_MAX:-3}
+ExitOnForwardFailure ${SSH_EXIT_ON_FORWARD_FAILURE:-yes}
+SessionType ${SSH_SESSION_TYPE:-none}
+" >$HOME/.ssh/config
 
-export AUTOSSH_GATETIME=0
-export AUTOSSH_POLL=30
+################################
+# autossh options              #
+################################
+export AUTOSSH_PORT=${AUTOSSH_PORT:-0}
+export AUTOSSH_GATETIME=${AUTOSSH_GATETIME:-0}
+export AUTOSSH_POLL=${AUTOSSH_POLL:-30}
 
-# Keep container running
-exec /usr/bin/autossh -M 0 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -N -T -p $SERVER_PORT $PORT_FORWARDING_RULE tunnel@$SERVER_HOST
+################################
+# start the SSH tunnel         #
+################################
+exec /usr/bin/autossh -T $SSH_CLI_OPTIONS $SSH_HOSTNAME
