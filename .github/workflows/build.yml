@@ -30,6 +30,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: server
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/querateam/docker-ssh-tunnel/server:latest
 
@@ -37,5 +38,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: client
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/querateam/docker-ssh-tunnel/client:latest
