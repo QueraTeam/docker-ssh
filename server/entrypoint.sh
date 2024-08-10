@@ -51,7 +51,7 @@ SSHD_FORCE_COMMAND=${SSHD_FORCE_COMMAND:-"/sbin/nologin"}
 SSHD_ALLOW_USERS=${SSHD_ALLOW_USERS:-tunnel}
 
 # Generate the SSHD configuration
-cat <<EOF >/etc/ssh/sshd_config.d/tunnel.conf
+printf "\
 Port $SSHD_PORT
 PermitRootLogin $SSHD_PERMIT_ROOT_LOGIN
 PermitEmptyPasswords $SSHD_PERMIT_EMPTY_PASSWORDS
@@ -64,13 +64,15 @@ GatewayPorts $SSHD_GATEWAY_PORTS
 PermitTunnel $SSHD_PERMIT_TUNNEL
 PermitTTY $SSHD_PERMIT_TTY
 PermitUserRC $SSHD_PERMIT_USER_RC
+${SSHD_PERMIT_OPEN:+PermitOpen ${SSHD_PERMIT_OPEN}\n}\
+${SSHD_PERMIT_LISTEN:+PermitListen ${SSHD_PERMIT_LISTEN}\n}\
 AllowTcpForwarding $SSHD_ALLOW_TCP_FORWARDING
 AllowStreamLocalForwarding $SSHD_ALLOW_STREAM_LOCAL_FORWARDING
 X11Forwarding $SSHD_X11_FORWARDING
 AllowAgentForwarding $SSHD_ALLOW_AGENT_FORWARDING
 ForceCommand $SSHD_FORCE_COMMAND
 AllowUsers $SSHD_ALLOW_USERS
-EOF
+" >/etc/ssh/sshd_config.d/tunnel.conf
 
 # Start SSHD
 exec /usr/sbin/sshd -D -e

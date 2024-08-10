@@ -39,6 +39,8 @@ Optional parameters for `sshd_config`:
 | `SSHD_PERMIT_TUNNEL`                 | `no`              |
 | `SSHD_PERMIT_TTY`                    | `no`              |
 | `SSHD_PERMIT_USER_RC`                | `no`              |
+| `SSHD_PERMIT_OPEN`                   | -                 |
+| `SSHD_PERMIT_LISTEN`                 | -                 |
 | `SSHD_ALLOW_TCP_FORWARDING`          | `remote`          |
 | `SSHD_ALLOW_STREAM_LOCAL_FORWARDING` | `no`              |
 | `SSHD_X11_FORWARDING`                | `no`              |
