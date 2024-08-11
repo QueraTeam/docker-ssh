@@ -106,7 +106,8 @@ As a result, autossh detects the connection problem and restarts SSH.
 
 ## Key generation
 
-You need two pairs of SSH keys to establish a secure SSH connection.
+You need two SSH key pairs to establish a secure SSH connection
+without the risk of MITM (Man-In-The-Middle) attacks.
 We encode the private keys in base64 format to pass them as environment variables.
 
 ```shell
@@ -116,6 +117,10 @@ cat key1 | base64 -w 0 > key1.base64
 ssh-keygen -t ed25519 -N '' -C key2-$(date -I) -f key2
 cat key2 | base64 -w 0 > key2.base64
 ```
+
+> [!WARNING]  
+> Make sure both private keys are kept secret.
+> Any file containing a private key should be protected with proper file permissions.
 
 ## Example usage
 
