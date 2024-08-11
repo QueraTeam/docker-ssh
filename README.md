@@ -1,6 +1,6 @@
 # Docker SSH Tunnel
 
-This project provides alpine-based Docker images
+This project provides Alpine-based Docker images
 for setting up a persistent SSH tunnel
 between two containers on different servers.
 
@@ -10,7 +10,7 @@ between two containers on different servers.
 docker pull ghcr.io/querateam/docker-ssh-tunnel/server
 ```
 
-The following environment variables are supported in the server image.
+The server image supports the following environment variables:
 
 #### SSH keys
 
@@ -54,7 +54,7 @@ docker pull ghcr.io/querateam/docker-ssh-tunnel/client
 ```
 
 The client image uses `autossh` to establish a persistent SSH tunnel.
-The following environment variables are supported in the client image.
+The client image supports the following environment variables:
 
 #### SSH keys
 
@@ -77,14 +77,19 @@ For more information, see the [`ssh_config(5)`](https://linux.die.net/man/5/ssh_
 | `SSH_SESSION_TYPE`            | SessionType                    | `none`        |
 
 You can pass arguments to `ssh` command using the `SSH_CLI_OPTIONS` environment variable.
-You can define the SSH port forwarding rule using this variable. Examples:
+You can define the SSH port forwarding using this variable (`-R` and `-L` options).
+Please note that the server image only supports
+remote port forwarding by default for security reasons.
+If you want to use local port forwarding,
+you need to enable it in the server image
+by setting the `SSHD_ALLOW_TCP_FORWARDING` environment variable to `local` or `all`.
+In this case, consider `SSHD_PERMIT_OPEN` option to restrict the port forwarding.
 
-- `-R remote_port:local_host:local_port`
-- `-R remote_host:remote_port:local_host:local_port`
+![SSH port forwarding cheatsheet](docs/ssh-port-forwarding.png)
 
-#### AutoSSH options
+#### Autossh options
 
-All [AutoSSH environment variables](https://github.com/Autossh/autossh)
+All [autossh environment variables](https://github.com/Autossh/autossh)
 are supported, but the following variables have a default set in this image:
 
 | Environment Variable | Default Value |
@@ -94,8 +99,10 @@ are supported, but the following variables have a default set in this image:
 | `AUTOSSH_POLL`       | `30`          |
 
 In this image, the autossh monitoring function is turned off by default (`AUTOSSH_PORT=0`).
-Instead of the monitoring function, this image uses `ServerAliveInterval`, `ServerAliveCountMax`, and `ExitOnForwardFailure` ssh options to have the SSH client exit if it finds itself no longer connected to the server.
-As a result, autossh detects the connection problem and restarts ssh.
+Instead of the monitoring function,
+this image uses `ServerAliveInterval`, `ServerAliveCountMax`, and `ExitOnForwardFailure` SSH options
+to have the SSH client exit if it finds itself no longer connected to the server.
+As a result, autossh detects the connection problem and restarts SSH.
 
 ## Key generation
 
@@ -124,6 +131,7 @@ KEY2_PUB=$(cat key2.pub)
 docker run --name tunnel-server --rm -it --init \
   -e SERVER_ED25519_PRIVATE_KEY_BASE64="$KEY1_BASE64" \
   -e CLIENT_AUTHORIZED_KEYS="$KEY2_PUB" \
+  -e SSHD_PERMIT_LISTEN="0.0.0.0:4444" \
   -p 2222:22 \
   -p 127.0.0.1:4444:4444 \
   ghcr.io/querateam/docker-ssh-tunnel/server
@@ -141,12 +149,19 @@ docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:
   ghcr.io/querateam/docker-ssh-tunnel/client
 ```
 
-Test the tunnel using `nc`:
+To test the tunnel connection,
+run the following commands in separate terminals:
 
 ```shell
 docker exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
+```
+
+```shell
 nc 127.0.0.1 4444
 ```
+
+Type some text and press `Enter` in one terminal.
+You should see the text in the other terminal.
 
 ## Docker compose example
 
@@ -158,6 +173,7 @@ services:
     environment:
       SERVER_ED25519_PRIVATE_KEY_BASE64: ... value of key1.base64 ...
       CLIENT_AUTHORIZED_KEYS: ... value of key2.pub ...
+      SSHD_PERMIT_LISTEN: 0.0.0.0:4444
     ports:
       - 2222:22
       - 127.0.0.1:4444:4444
@@ -175,9 +191,16 @@ services:
       - host.docker.internal:host-gateway
 ```
 
-Test the tunnel using `nc`:
+To test the tunnel connection,
+run the following commands in separate terminals:
 
 ```shell
 docker compose exec -it tunnel-client /usr/bin/nc -l -s 127.0.0.1 -p 6666
+```
+
+```shell
 nc 127.0.0.1 4444
 ```
+
+Type some text and press `Enter` in one terminal.
+You should see the text in the other terminal.
