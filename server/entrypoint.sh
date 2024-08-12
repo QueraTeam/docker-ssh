@@ -13,7 +13,7 @@ else
 fi
 if [ -n "$SERVER_ED25519_PUBLIC_KEY" ]; then
     echo "$SERVER_ED25519_PUBLIC_KEY" >/etc/ssh/ssh_host_ed25519_key.pub
-    chmod 644 /etc/ssh/ssh_host_ed25519_key
+    chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
 fi
 
 ################################
