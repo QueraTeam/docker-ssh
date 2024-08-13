@@ -1,5 +1,23 @@
 #!/bin/sh
 
+# Ensure the script is not run by the "root" user.
+if [ "$(id -u)" = "0" ]; then
+    echo "This image should not be run as the 'root' user. Exiting..."
+    exit 1
+fi
+
+# We don't want to depend on the existence of a real user and a home directory,
+# so we can run the container as any non-root user with any uid and gid.
+# We achieve this by creating a "fake" home directory,
+# and using nss_wrapper to "fake" /etc/passwd contents, so "ssh" thinks the user exists.
+# https://cwrap.org/nss_wrapper.html
+export HOME="/tmp/tunnel"
+echo "tunnel:x:$(id -u):$(id -g):Tunnel User:${HOME}:/bin/false" >/tmp/passwd
+echo "tunnel:x:$(id -g):tunnel" >/tmp/group
+export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
+mkdir -p "$HOME/sshd" "$HOME/.ssh"
+chmod -R 700 "$HOME"
+
 ################################
 # setup host key               #
 ################################
@@ -8,12 +26,12 @@ if [ -z "$SERVER_ED25519_PRIVATE_KEY_BASE64" ]; then
     exit 1
 else
     echo "Setting up the host key from the environment variable..."
-    echo "$SERVER_ED25519_PRIVATE_KEY_BASE64" | base64 -d >/etc/ssh/ssh_host_ed25519_key
-    chmod 600 /etc/ssh/ssh_host_ed25519_key
+    echo "$SERVER_ED25519_PRIVATE_KEY_BASE64" | base64 -d >"$HOME/sshd/ssh_host_ed25519_key"
+    chmod 600 "$HOME/sshd/ssh_host_ed25519_key"
 fi
 if [ -n "$SERVER_ED25519_PUBLIC_KEY" ]; then
-    echo "$SERVER_ED25519_PUBLIC_KEY" >/etc/ssh/ssh_host_ed25519_key.pub
-    chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+    echo "$SERVER_ED25519_PUBLIC_KEY" >"$HOME/sshd/ssh_host_ed25519_key.pub"
+    chmod 644 "$HOME/sshd/ssh_host_ed25519_key.pub"
 fi
 
 ################################
@@ -23,21 +41,21 @@ if [ -z "$CLIENT_AUTHORIZED_KEYS" ]; then
     echo "CLIENT_AUTHORIZED_KEYS is not set. Exiting..."
     exit 1
 else
-    mkdir -p /home/tunnel/.ssh
-    chmod 700 /home/tunnel/.ssh
     # Split the CLIENT_AUTHORIZED_KEYS variable by semicolon and add each to authorized_keys
     echo "$CLIENT_AUTHORIZED_KEYS" | tr ';' '\n' | while IFS= read -r key; do
         # Process each key here
-        echo "$key" >>/home/tunnel/.ssh/authorized_keys
+        echo "$key" >>"$HOME/.ssh/authorized_keys"
     done
-    chmod 600 /home/tunnel/.ssh/authorized_keys
-    chown -R tunnel:tunnel /home/tunnel/.ssh
+    chmod 600 "$HOME/.ssh/authorized_keys"
 fi
 
 ################################
 # sshd_config options          #
 ################################
 printf "\
+AuthorizedKeysFile .ssh/authorized_keys
+HostKey ${HOME}/sshd/ssh_host_ed25519_key
+PidFile none
 Port ${SSHD_PORT:-22}
 PermitRootLogin ${SSHD_PERMIT_ROOT_LOGIN:-no}
 PermitEmptyPasswords ${SSHD_PERMIT_EMPTY_PASSWORDS:-no}
@@ -58,9 +76,9 @@ X11Forwarding ${SSHD_X11_FORWARDING:-no}
 AllowAgentForwarding ${SSHD_ALLOW_AGENT_FORWARDING:-no}
 ForceCommand ${SSHD_FORCE_COMMAND:-"/sbin/nologin"}
 AllowUsers ${SSHD_ALLOW_USERS:-tunnel}
-" >/etc/ssh/sshd_config.d/tunnel.conf
+" >"$HOME/sshd/sshd.conf"
 
 ################################
 # Start sshd                   #
 ################################
-exec /usr/sbin/sshd -D -e
+exec /usr/sbin/sshd -D -e -f "$HOME/sshd/sshd.conf"

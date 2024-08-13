@@ -134,6 +134,7 @@ Start server and client services:
 KEY1_BASE64=$(cat key1.base64)
 KEY2_PUB=$(cat key2.pub)
 docker run --name tunnel-server --rm -it --init \
+  --user 12345:12345 \
   -e SERVER_ED25519_PRIVATE_KEY_BASE64="$KEY1_BASE64" \
   -e CLIENT_AUTHORIZED_KEYS="$KEY2_PUB" \
   -e SSHD_PERMIT_LISTEN="0.0.0.0:4444" \
@@ -146,6 +147,7 @@ docker run --name tunnel-server --rm -it --init \
 KEY2_BASE64=$(cat key2.base64)
 KEY1_PUB=$(cat key1.pub)
 docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:host-gateway \
+  --user 12345:12345 \
   -e SERVER_ED25519_PUBLIC_KEY="$KEY1_PUB" \
   -e CLIENT_ED25519_PRIVATE_KEY_BASE64="$KEY2_BASE64" \
   -e SSH_HOSTNAME="host.docker.internal" \
@@ -175,6 +177,7 @@ services:
   tunnel-server:
     image: ghcr.io/querateam/docker-ssh-tunnel/server
     restart: always
+    user: 12345:12345
     environment:
       SERVER_ED25519_PRIVATE_KEY_BASE64: ... value of key1.base64 ...
       CLIENT_AUTHORIZED_KEYS: ... value of key2.pub ...
@@ -186,6 +189,7 @@ services:
   tunnel-client:
     image: ghcr.io/querateam/docker-ssh-tunnel/client
     restart: always
+    user: 12345:12345
     environment:
       SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
       CLIENT_ED25519_PRIVATE_KEY_BASE64: ... value of key2.base64 ...

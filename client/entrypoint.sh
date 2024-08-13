@@ -1,18 +1,27 @@
 #!/bin/sh
 
-# Ensure script is run by "tunnel" user
-if [ "$(id -un)" != "tunnel" ]; then
-    echo "This script must be run as the 'tunnel' user. Exiting..."
+# Ensure the script is not run by the "root" user.
+if [ "$(id -u)" = "0" ]; then
+    echo "This image should not be run as the 'root' user. Exiting..."
     exit 1
 fi
-
-mkdir -p $HOME/.ssh
-chmod 700 $HOME/.ssh
 
 if [ -z "$SSH_HOSTNAME" ]; then
     echo "SSH_HOSTNAME is not set. Exiting..."
     exit 1
 fi
+
+# We don't want to depend on the existence of a real user and a home directory,
+# so we can run the container as any non-root user with any uid and gid.
+# We achieve this by creating a "fake" home directory,
+# and using nss_wrapper to "fake" /etc/passwd contents, so "ssh" thinks the user exists.
+# https://cwrap.org/nss_wrapper.html
+export HOME="/tmp/tunnel"
+echo "tunnel:x:$(id -u):$(id -g):Tunnel User:${HOME}:/bin/false" >/tmp/passwd
+echo "tunnel:x:$(id -g):tunnel" >/tmp/group
+export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
+mkdir -p "$HOME/.ssh"
+chmod -R 700 "$HOME"
 
 ################################
 # setup keys                   #
