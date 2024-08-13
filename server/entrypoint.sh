@@ -55,7 +55,6 @@ if [ -z "${CLIENT_AUTHORIZED_KEYS}" ]; then
 else
     # Split the CLIENT_AUTHORIZED_KEYS variable by semicolon and add each to authorized_keys
     echo "${CLIENT_AUTHORIZED_KEYS}" | tr ';' '\n' | while IFS= read -r key; do
-        # Process each key here
         echo "${key}" >>"${HOME}/.ssh/authorized_keys"
     done
     chmod 600 "${HOME}/.ssh/authorized_keys"

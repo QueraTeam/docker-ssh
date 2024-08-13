@@ -10,6 +10,10 @@ if [ -z "${SSH_HOSTNAME}" ]; then
     echo "SSH_HOSTNAME is not set. Exiting..."
     exit 1
 fi
+if [ -z "${SSH_REMOTE_FORWARD}" ] && [ -z "${SSH_LOCAL_FORWARD}" ]; then
+    echo "You should set at least one of SSH_REMOTE_FORWARD and SSH_LOCAL_FORWARD. Exiting..."
+    exit 1
+fi
 
 # We don't want to depend on the existence of a real user and a home directory,
 # so we can run the container as any non-root user with any uid and gid.
@@ -65,6 +69,16 @@ ServerAliveCountMax ${SSH_SERVER_ALIVE_COUNT_MAX:-3}
 ExitOnForwardFailure ${SSH_EXIT_ON_FORWARD_FAILURE:-yes}
 SessionType ${SSH_SESSION_TYPE:-none}
 " >"${HOME}/.ssh/config"
+if [ -n "${SSH_REMOTE_FORWARD}" ]; then
+    echo "${SSH_REMOTE_FORWARD}" | tr ';' '\n' | while IFS= read -r remote_forward; do
+        echo "RemoteForward ${remote_forward}" >>"${HOME}/.ssh/config"
+    done
+fi
+if [ -n "${SSH_LOCAL_FORWARD}" ]; then
+    echo "${SSH_LOCAL_FORWARD}" | tr ';' '\n' | while IFS= read -r local_forward; do
+        echo "LocalForward ${local_forward}" >>"${HOME}/.ssh/config"
+    done
+fi
 
 ################################
 # autossh options              #
@@ -76,4 +90,4 @@ export AUTOSSH_POLL="${AUTOSSH_POLL:-30}"
 ################################
 # start the SSH tunnel         #
 ################################
-exec /usr/bin/autossh -T ${SSH_CLI_OPTIONS} "${SSH_HOSTNAME}"
+exec /usr/bin/autossh -T "${SSH_HOSTNAME}"

@@ -73,13 +73,16 @@ For more information, see the [`ssh_config(5)`](https://linux.die.net/man/5/ssh_
 | ----------------------------- | ------------------------------ | ------------- |
 | `SSH_HOSTNAME` _required_     | Hostname                       | -             |
 | `SSH_PORT`                    | Port                           | `22`          |
+| `SSH_REMOTE_FORWARD`          | RemoteForward                  | -             |
+| `SSH_LOCAL_FORWARD`           | LocalForward                   | -             |
 | `SSH_SERVER_ALIVE_INTERVAL`   | ServerAliveInterval            | `10`          |
 | `SSH_SERVER_ALIVE_COUNT_MAX`  | ServerAliveCountMax            | `3`           |
 | `SSH_EXIT_ON_FORWARD_FAILURE` | ExitOnForwardFailure           | `yes`         |
 | `SSH_SESSION_TYPE`            | SessionType                    | `none`        |
 
-You can pass arguments to `ssh` command using the `SSH_CLI_OPTIONS` environment variable.
-You can define the SSH port forwarding using this variable (`-R` and `-L` options).
+You can define the SSH port forwarding using `SSH_REMOTE_FORWARD` and `SSH_LOCAL_FORWARD`.
+Each of these variables can have multiple port forwarding rules separated by semicolons (`;`).
+
 Please note that the server image only supports
 remote port forwarding by default for security reasons.
 If you want to use local port forwarding,
@@ -147,7 +150,7 @@ docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:
   -e CLIENT_ED25519_PRIVATE_KEY_BASE64="$(cat key2 | base64 -w 0)" \
   -e SSH_HOSTNAME="host.docker.internal" \
   -e SSH_PORT="2222" \
-  -e SSH_CLI_OPTIONS="-R 0.0.0.0:4444:127.0.0.1:6666" \
+  -e SSH_REMOTE_FORWARD="0.0.0.0:4444 127.0.0.1:6666" \
   ghcr.io/querateam/docker-ssh-tunnel/client
 ```
 
@@ -194,7 +197,7 @@ services:
       SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
       SSH_HOSTNAME: host.docker.internal
       SSH_PORT: 2222
-      SSH_CLI_OPTIONS: -R 0.0.0.0:4444:127.0.0.1:6666
+      SSH_REMOTE_FORWARD: 0.0.0.0:4444 127.0.0.1:6666
     extra_hosts:
       - host.docker.internal:host-gateway
 
