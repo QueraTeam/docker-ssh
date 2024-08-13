@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Ensure the script is not run by the "root" user.
-if [ "$(id -u)" = "0" ]; then
+if [ "$(id -u)" == "0" ]; then
     echo "This image should not be run as the 'root' user. Exiting..."
     exit 1
 fi
@@ -15,49 +15,50 @@ export HOME="/tmp/tunnel"
 echo "tunnel:x:$(id -u):$(id -g):Tunnel User:${HOME}:/bin/false" >/tmp/passwd
 echo "tunnel:x:$(id -g):tunnel" >/tmp/group
 export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
-mkdir -p "$HOME/sshd" "$HOME/.ssh"
-chmod -R 700 "$HOME"
-
-################################
-# read private key from file   #
-################################
-if [ -n "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
-    if [ -r "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
-        SERVER_ED25519_PRIVATE_KEY_BASE64="$(cat "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE}")"
-    else
-        echo "'${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}' is not readable."
-    fi
-fi
+mkdir -p "${HOME}/sshd" "${HOME}/.ssh"
+chmod -R 700 "${HOME}"
 
 ################################
 # setup host key               #
 ################################
-if [ -z "$SERVER_ED25519_PRIVATE_KEY_BASE64" ]; then
-    echo "SERVER_ED25519_PRIVATE_KEY_BASE64 is not set. Exiting..."
-    exit 1
+if [ -n "${SERVER_ED25519_PRIVATE_KEY_FILE}" ]; then
+    if [ -r "${SERVER_ED25519_PRIVATE_KEY_FILE}" ]; then
+        if [ "${SERVER_ED25519_PRIVATE_KEY_FILE}" != "${HOME}/sshd/ssh_host_ed25519_key" ]; then
+            cp "${SERVER_ED25519_PRIVATE_KEY_FILE}" "${HOME}/sshd/ssh_host_ed25519_key"
+            chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
+        fi
+        echo "Installed host key from key file."
+    else
+        echo "'${SERVER_ED25519_PRIVATE_KEY_FILE}' is not readable. Exiting..."
+        exit 1
+    fi
+elif [ -n "${SERVER_ED25519_PRIVATE_KEY_BASE64}" ]; then
+    echo "${SERVER_ED25519_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/sshd/ssh_host_ed25519_key"
+    chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
+    echo "Installed host key from env var."
 else
-    echo "Setting up the host key from the environment variable..."
-    echo "$SERVER_ED25519_PRIVATE_KEY_BASE64" | base64 -d >"$HOME/sshd/ssh_host_ed25519_key"
-    chmod 600 "$HOME/sshd/ssh_host_ed25519_key"
+    echo "No private key provided. Exiting..."
+    exit 1
 fi
-if [ -n "$SERVER_ED25519_PUBLIC_KEY" ]; then
-    echo "$SERVER_ED25519_PUBLIC_KEY" >"$HOME/sshd/ssh_host_ed25519_key.pub"
-    chmod 644 "$HOME/sshd/ssh_host_ed25519_key.pub"
+
+if [ -n "${SERVER_ED25519_PUBLIC_KEY}" ]; then
+    echo "${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/sshd/ssh_host_ed25519_key.pub"
+    chmod 644 "${HOME}/sshd/ssh_host_ed25519_key.pub"
 fi
 
 ################################
 # configure authorized_keys    #
 ################################
-if [ -z "$CLIENT_AUTHORIZED_KEYS" ]; then
+if [ -z "${CLIENT_AUTHORIZED_KEYS}" ]; then
     echo "CLIENT_AUTHORIZED_KEYS is not set. Exiting..."
     exit 1
 else
     # Split the CLIENT_AUTHORIZED_KEYS variable by semicolon and add each to authorized_keys
-    echo "$CLIENT_AUTHORIZED_KEYS" | tr ';' '\n' | while IFS= read -r key; do
+    echo "${CLIENT_AUTHORIZED_KEYS}" | tr ';' '\n' | while IFS= read -r key; do
         # Process each key here
-        echo "$key" >>"$HOME/.ssh/authorized_keys"
+        echo "${key}" >>"${HOME}/.ssh/authorized_keys"
     done
-    chmod 600 "$HOME/.ssh/authorized_keys"
+    chmod 600 "${HOME}/.ssh/authorized_keys"
 fi
 
 ################################
@@ -87,9 +88,9 @@ X11Forwarding ${SSHD_X11_FORWARDING:-no}
 AllowAgentForwarding ${SSHD_ALLOW_AGENT_FORWARDING:-no}
 ForceCommand ${SSHD_FORCE_COMMAND:-"/sbin/nologin"}
 AllowUsers ${SSHD_ALLOW_USERS:-tunnel}
-" >"$HOME/sshd/sshd.conf"
+" >"${HOME}/sshd/sshd.conf"
 
 ################################
 # Start sshd                   #
 ################################
-exec /usr/sbin/sshd -D -e -f "$HOME/sshd/sshd.conf"
+exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf"

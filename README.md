@@ -14,12 +14,12 @@ The server image supports the following environment variables:
 
 #### SSH keys
 
-| Environment Variable                                | Description                                                                                                      |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `SERVER_ED25519_PRIVATE_KEY_BASE64` <br> _required_ | The server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
-| `SERVER_ED25519_PRIVATE_KEY_BASE64_FILE`            | Alternative to `SERVER_ED25519_PRIVATE_KEY_BASE64`, for usage with docker secrets.                               |
-| `SERVER_ED25519_PUBLIC_KEY`                         | The server's host public key (ed25519).                                                                          |
-| `CLIENT_AUTHORIZED_KEYS` <br> _required_            | The client public keys authorized to connect as `tunnel` user. The keys should be separated by semicolons (`;`). |
+| Environment Variable                              | Description                                                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `SERVER_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
+| `SERVER_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_ED25519_PRIVATE_KEY_FILE` (base64-encoded value).                                             |
+| `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                              |
+| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect as `tunnel` user. The keys should be separated by semicolons (`;`).     |
 
 #### SSHD options
 
@@ -59,11 +59,11 @@ The client image supports the following environment variables:
 
 #### SSH keys
 
-| Environment Variable                                | Equivalent ssh_config Argument                                                     |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `SERVER_ED25519_PUBLIC_KEY` <br> _required_         | The server's host public key (ed25519). This key will be added to `known_hosts`.   |
-| `CLIENT_ED25519_PRIVATE_KEY_BASE64` <br> _required_ | The client's SSH private key.                                                      |
-| `CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE`            | Alternative to `CLIENT_ED25519_PRIVATE_KEY_BASE64`, for usage with docker secrets. |
+| Environment Variable                              | Equivalent ssh_config Argument                                                   |
+| ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `SERVER_ED25519_PUBLIC_KEY` <br> _required_       | The server's host public key (ed25519). This key will be added to `known_hosts`. |
+| `CLIENT_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to the client's SSH private key.                                            |
+| `CLIENT_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `CLIENT_ED25519_PRIVATE_KEY_FILE` (base64-encoded value)          |
 
 #### SSH options
 
@@ -114,12 +114,7 @@ We encode the private keys in base64 format to pass them as environment variable
 
 ```shell
 ssh-keygen -t ed25519 -N '' -C key1-$(date -I) -f key1
-cat key1 | base64 -w 0 > key1.base64
-chmod 600 key1.base64
-
 ssh-keygen -t ed25519 -N '' -C key2-$(date -I) -f key2
-cat key2 | base64 -w 0 > key2.base64
-chmod 600 key2.base64
 ```
 
 > [!WARNING]  
@@ -135,12 +130,10 @@ the client and server containers should be run on different hosts.
 Start server and client services:
 
 ```shell
-KEY1_BASE64=$(cat key1.base64)
-KEY2_PUB=$(cat key2.pub)
 docker run --name tunnel-server --rm -it --init \
   --user 12345:12345 \
-  -e SERVER_ED25519_PRIVATE_KEY_BASE64="$KEY1_BASE64" \
-  -e CLIENT_AUTHORIZED_KEYS="$KEY2_PUB" \
+  -e SERVER_ED25519_PRIVATE_KEY_BASE64="$(cat key1 | base64 -w 0)" \
+  -e CLIENT_AUTHORIZED_KEYS="$(cat key2.pub)" \
   -e SSHD_PERMIT_LISTEN="0.0.0.0:4444" \
   -p 2222:22 \
   -p 127.0.0.1:4444:4444 \
@@ -148,12 +141,10 @@ docker run --name tunnel-server --rm -it --init \
 ```
 
 ```shell
-KEY2_BASE64=$(cat key2.base64)
-KEY1_PUB=$(cat key1.pub)
 docker run --name tunnel-client --rm -it --init --add-host=host.docker.internal:host-gateway \
   --user 12345:12345 \
-  -e SERVER_ED25519_PUBLIC_KEY="$KEY1_PUB" \
-  -e CLIENT_ED25519_PRIVATE_KEY_BASE64="$KEY2_BASE64" \
+  -e SERVER_ED25519_PUBLIC_KEY="$(cat key1.pub)" \
+  -e CLIENT_ED25519_PRIVATE_KEY_BASE64="$(cat key2 | base64 -w 0)" \
   -e SSH_HOSTNAME="host.docker.internal" \
   -e SSH_PORT="2222" \
   -e SSH_CLI_OPTIONS="-R 0.0.0.0:4444:127.0.0.1:6666" \
@@ -181,11 +172,11 @@ services:
   tunnel-server:
     image: ghcr.io/querateam/docker-ssh-tunnel/server
     restart: always
-    user: 12345:12345 # must have read access to key1.base64
+    user: 12345:12345 # must have read access to key1
     secrets:
-      - key1_base64
+      - key1
     environment:
-      SERVER_ED25519_PRIVATE_KEY_BASE64_FILE: /run/secrets/key1_base64
+      SERVER_ED25519_PRIVATE_KEY_FILE: /run/secrets/key1
       CLIENT_AUTHORIZED_KEYS: ... value of key2.pub ...
       SSHD_PERMIT_LISTEN: 0.0.0.0:4444
     ports:
@@ -195,12 +186,12 @@ services:
   tunnel-client:
     image: ghcr.io/querateam/docker-ssh-tunnel/client
     restart: always
-    user: 12345:12345 # must have read access to key2.base64
+    user: 12345:12345 # must have read access to key2
     secrets:
-      - key2_base64
+      - key2
     environment:
+      CLIENT_ED25519_PRIVATE_KEY_FILE: /run/secrets/key2
       SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
-      CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE: /run/secrets/key2_base64
       SSH_HOSTNAME: host.docker.internal
       SSH_PORT: 2222
       SSH_CLI_OPTIONS: -R 0.0.0.0:4444:127.0.0.1:6666
@@ -208,10 +199,10 @@ services:
       - host.docker.internal:host-gateway
 
 secrets:
-  key1_base64:
-    file: key1.base64
-  key2_base64:
-    file: key2.base64
+  key1:
+    file: ./key1
+  key2:
+    file: ./key2
 ```
 
 To test the tunnel connection,
