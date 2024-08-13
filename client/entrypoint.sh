@@ -24,6 +24,17 @@ mkdir -p "$HOME/.ssh"
 chmod -R 700 "$HOME"
 
 ################################
+# read private key from file   #
+################################
+if [ -n "${CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
+    if [ -r "${CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
+        CLIENT_ED25519_PRIVATE_KEY_BASE64="$(cat "${CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE}")"
+    else
+        echo "'${CLIENT_ED25519_PRIVATE_KEY_BASE64_FILE:-}' is not readable."
+    fi
+fi
+
+################################
 # setup keys                   #
 ################################
 if [ -z "$CLIENT_ED25519_PRIVATE_KEY_BASE64" ]; then

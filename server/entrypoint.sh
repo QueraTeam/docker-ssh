@@ -19,6 +19,17 @@ mkdir -p "$HOME/sshd" "$HOME/.ssh"
 chmod -R 700 "$HOME"
 
 ################################
+# read private key from file   #
+################################
+if [ -n "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
+    if [ -r "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}" ]; then
+        SERVER_ED25519_PRIVATE_KEY_BASE64="$(cat "${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE}")"
+    else
+        echo "'${SERVER_ED25519_PRIVATE_KEY_BASE64_FILE:-}' is not readable."
+    fi
+fi
+
+################################
 # setup host key               #
 ################################
 if [ -z "$SERVER_ED25519_PRIVATE_KEY_BASE64" ]; then
