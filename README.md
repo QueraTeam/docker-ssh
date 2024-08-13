@@ -14,12 +14,12 @@ The server image supports the following environment variables:
 
 #### SSH keys
 
-| Environment Variable                              | Description                                                                                                          |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `SERVER_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
-| `SERVER_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_ED25519_PRIVATE_KEY_FILE` (base64-encoded value).                                             |
-| `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                              |
-| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect as `tunnel` user. The keys should be separated by semicolons (`;`).     |
+| Environment Variable                              | Description                                                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `SERVER_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to the server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
+| `SERVER_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_ED25519_PRIVATE_KEY_FILE` (base64-encoded value).                                                 |
+| `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                                  |
+| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect. The keys should be separated by semicolons (`;`).                          |
 
 #### SSHD options
 
@@ -113,7 +113,6 @@ As a result, autossh detects the connection problem and restarts SSH.
 
 You need two SSH key pairs to establish a secure SSH connection
 without the risk of MITM (Man-In-The-Middle) attacks.
-We encode the private keys in base64 format to pass them as environment variables.
 
 ```shell
 ssh-keygen -t ed25519 -N '' -C key1-$(date -I) -f key1
