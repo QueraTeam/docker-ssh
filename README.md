@@ -4,6 +4,8 @@ This project provides Alpine-based Docker images
 for setting up a persistent SSH tunnel
 between two containers on different servers.
 
+Both images support running as an arbitrary user via `--user` on `docker run`.
+
 ## Server image
 
 ```shell

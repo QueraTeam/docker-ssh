@@ -15,10 +15,10 @@ if [ -z "${SSH_REMOTE_FORWARD}" ] && [ -z "${SSH_LOCAL_FORWARD}" ]; then
     exit 1
 fi
 
-# We don't want to depend on the existence of a real user and a home directory,
-# so we can run the container as any non-root user with any uid and gid.
-# We achieve this by creating a "fake" home directory,
-# and using nss_wrapper to "fake" /etc/passwd contents, so "ssh" thinks the user exists.
+# We want to be able to run as an arbitrary user via `--user` on `docker run`.
+# So we don't depend on the existence of a real user and a home directory.
+# We make things work by creating a "fake" home directory, and using nss_wrapper
+# to "fake" /etc/passwd contents, so "openssh" thinks the user exists.
 # https://cwrap.org/nss_wrapper.html
 export HOME="/tmp/tunnel"
 echo "tunnel:x:$(id -u):$(id -g):Tunnel User:${HOME}:/bin/false" >/tmp/passwd
