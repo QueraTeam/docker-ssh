@@ -12,7 +12,7 @@ fi
 # to "fake" /etc/passwd contents, so "openssh" thinks the user exists.
 # https://cwrap.org/nss_wrapper.html
 export HOME="/tmp/sshuser"
-echo "sshuser:x:$(id -u):$(id -g):SSH User:${HOME}:/bin/false" >/tmp/passwd
+echo "sshuser:x:$(id -u):$(id -g):SSH User:${HOME}:/bin/sh" >/tmp/passwd
 echo "sshuser:x:$(id -g):sshuser" >/tmp/group
 export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
 mkdir -p "${HOME}/sshd" "${HOME}/.ssh"
