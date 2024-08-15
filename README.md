@@ -25,7 +25,7 @@ The server image supports the following environment variables:
 
 #### SSHD options
 
-For more information, see the [`sshd_config(5)`](https://linux.die.net/man/5/sshd_config) manual.
+For more information, see the [`sshd_config(5)`] manual.
 
 | Environment Variable                 | sshd_config Option         | Default           |
 | ------------------------------------ | -------------------------- | ----------------- |
@@ -68,7 +68,7 @@ The client image supports the following environment variables:
 
 #### SSH options
 
-For more information, see the [`ssh_config(5)`](https://linux.die.net/man/5/ssh_config) manual.
+For more information, see the [`ssh_config(5)`] manual.
 
 | Environment Variable          | ssh_config Option    | Default |
 | ----------------------------- | -------------------- | ------- |
@@ -137,7 +137,7 @@ When enabling TCP forwarding,
 also set `SSHD_PERMIT_LISTEN` or `SSHD_PERMIT_OPEN` option (or both) to restrict the port forwarding.
 
 You can learn more about remote and local forwarding by reading `RemoteForward` and `LocalForward`
-sections in [ssh_config(5)](https://linux.die.net/man/5/ssh_config).
+sections in [`ssh_config(5)`].
 I have made a simple cheatsheet:
 
 ![SSH port forwarding cheatsheet](docs/ssh-port-forwarding.png)
@@ -210,9 +210,7 @@ to run an rsync command periodically.
 To use rsync securely, you need to restrict the user's ssh login
 to only allow the running of an rsync transfer.
 A simple solution is to force the running of an rsync daemon-over-ssh command
-and define restrictions
-in [`rsyncd.conf`](https://download.samba.org/pub/rsync/rsyncd.conf.5)
-in the server container.
+and define restrictions in [`rsyncd.conf(5)`] in the server container.
 
 In the following example, a file is synced to the server every midnight.
 
@@ -272,4 +270,9 @@ secrets:
     file: ./key2
 ```
 
-[cronexpr]: (https://github.com/aptible/supercronic/tree/master/cronexpr)
+<!--------------------------------------------------------------------->
+
+[`sshd_config(5)`]: https://linux.die.net/man/5/sshd_config
+[`ssh_config(5)`]: https://linux.die.net/man/5/ssh_config
+[`rsyncd.conf(5)`]: https://download.samba.org/pub/rsync/rsyncd.conf.5
+[cronexpr]: https://github.com/aptible/supercronic/tree/master/cronexpr
