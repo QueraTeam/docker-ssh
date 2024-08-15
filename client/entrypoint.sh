@@ -66,6 +66,7 @@ fi
 # ssh_config options           #
 ################################
 printf "\
+Hostname ${SSH_HOSTNAME}
 Port ${SSH_PORT:-22}
 User sshuser
 ServerAliveInterval ${SSH_SERVER_ALIVE_INTERVAL:-10}
@@ -95,4 +96,6 @@ export AUTOSSH_POLL="${AUTOSSH_POLL:-30}"
 ################################
 # start the SSH tunnel         #
 ################################
-exec /usr/bin/autossh "${SSH_HOSTNAME}"
+# "dummyhost" has no effect.
+# Actual hostname is set by SSH_HOSTNAME environment variable.
+exec /usr/bin/autossh dummyhost
