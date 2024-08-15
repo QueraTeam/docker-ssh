@@ -72,6 +72,7 @@ ServerAliveInterval ${SSH_SERVER_ALIVE_INTERVAL:-10}
 ServerAliveCountMax ${SSH_SERVER_ALIVE_COUNT_MAX:-3}
 ExitOnForwardFailure ${SSH_EXIT_ON_FORWARD_FAILURE:-yes}
 SessionType ${SSH_SESSION_TYPE:-none}
+RequestTTY no
 " >"${HOME}/.ssh/config"
 if [ -n "${SSH_REMOTE_FORWARD}" ]; then
     echo "${SSH_REMOTE_FORWARD}" | tr ';' '\n' | while IFS= read -r remote_forward; do
@@ -94,4 +95,4 @@ export AUTOSSH_POLL="${AUTOSSH_POLL:-30}"
 ################################
 # start the SSH tunnel         #
 ################################
-exec /usr/bin/autossh -T "${SSH_HOSTNAME}"
+exec /usr/bin/autossh "${SSH_HOSTNAME}"
