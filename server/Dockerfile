@@ -2,7 +2,7 @@
 FROM alpine:3.20
 
 # Install openssh-server
-RUN apk add --no-cache openssh-server nss_wrapper
+RUN apk add --no-cache openssh-server rsync nss_wrapper
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh

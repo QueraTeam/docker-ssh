@@ -1,7 +1,7 @@
 FROM alpine:3.20
 
 # Install openssh-client and autossh
-RUN apk add --no-cache openssh-client autossh nss_wrapper
+RUN apk add --no-cache openssh-client autossh rsync supercronic nss_wrapper
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh

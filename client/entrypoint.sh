@@ -10,10 +10,6 @@ if [ -z "${SSH_HOSTNAME}" ]; then
     echo "SSH_HOSTNAME is not set. Exiting..."
     exit 1
 fi
-if [ -z "${SSH_REMOTE_FORWARD}" ] && [ -z "${SSH_LOCAL_FORWARD}" ]; then
-    echo "You should set at least one of SSH_REMOTE_FORWARD and SSH_LOCAL_FORWARD. Exiting..."
-    exit 1
-fi
 
 # We want to be able to run as an arbitrary user via `--user` on `docker run`.
 # So we don't depend on the existence of a real user and a home directory.
@@ -94,6 +90,11 @@ export AUTOSSH_GATETIME="${AUTOSSH_GATETIME:-0}"
 export AUTOSSH_POLL="${AUTOSSH_POLL:-30}"
 
 ################################
-# start the command            #
+# run/schedule the command     #
 ################################
-exec "$@"
+if [ -n "${SCHEDULE}" ]; then
+    echo "${SCHEDULE} ${SCHEDULE_CMD}" >"${HOME}/crontab"
+    exec supercronic "${HOME}/crontab"
+else
+    exec "$@"
+fi
