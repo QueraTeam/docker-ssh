@@ -94,8 +94,6 @@ export AUTOSSH_GATETIME="${AUTOSSH_GATETIME:-0}"
 export AUTOSSH_POLL="${AUTOSSH_POLL:-30}"
 
 ################################
-# start the SSH tunnel         #
+# start the command            #
 ################################
-# "dummyhost" has no effect.
-# Actual hostname is set by SSH_HOSTNAME environment variable.
-exec /usr/bin/autossh dummyhost
+exec "$@"
