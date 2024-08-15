@@ -81,7 +81,7 @@ PermitTTY ${SSHD_PERMIT_TTY:-no}
 PermitUserRC ${SSHD_PERMIT_USER_RC:-no}
 ${SSHD_PERMIT_OPEN:+PermitOpen ${SSHD_PERMIT_OPEN}\n}\
 ${SSHD_PERMIT_LISTEN:+PermitListen ${SSHD_PERMIT_LISTEN}\n}\
-AllowTcpForwarding ${SSHD_ALLOW_TCP_FORWARDING:-remote}
+AllowTcpForwarding ${SSHD_ALLOW_TCP_FORWARDING:-no}
 AllowStreamLocalForwarding ${SSHD_ALLOW_STREAM_LOCAL_FORWARDING:-no}
 X11Forwarding ${SSHD_X11_FORWARDING:-no}
 AllowAgentForwarding ${SSHD_ALLOW_AGENT_FORWARDING:-no}

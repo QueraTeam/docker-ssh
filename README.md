@@ -43,7 +43,7 @@ For more information, see the [`sshd_config(5)`](https://linux.die.net/man/5/ssh
 | `SSHD_PERMIT_USER_RC`                | PermitUserRC               | `no`              |
 | `SSHD_PERMIT_OPEN`                   | PermitOpen                 | -                 |
 | `SSHD_PERMIT_LISTEN`                 | PermitListen               | -                 |
-| `SSHD_ALLOW_TCP_FORWARDING`          | AllowTcpForwarding         | `remote`          |
+| `SSHD_ALLOW_TCP_FORWARDING`          | AllowTcpForwarding         | `no`              |
 | `SSHD_ALLOW_STREAM_LOCAL_FORWARDING` | AllowStreamLocalForwarding | `no`              |
 | `SSHD_X11_FORWARDING`                | X11Forwarding              | `no`              |
 | `SSHD_ALLOW_AGENT_FORWARDING`        | AllowAgentForwarding       | `no`              |
@@ -84,12 +84,14 @@ For more information, see the [`ssh_config(5)`](https://linux.die.net/man/5/ssh_
 You can define the SSH port forwarding using `SSH_REMOTE_FORWARD` and `SSH_LOCAL_FORWARD`.
 Each of these variables can have multiple port forwarding rules separated by semicolons (`;`).
 
-Please note that the server image only supports
-remote port forwarding by default for security reasons.
-If you want to use local port forwarding,
-you need to enable it in the server image
-by setting the `SSHD_ALLOW_TCP_FORWARDING` environment variable to `local` or `all`.
-In this case, consider `SSHD_PERMIT_OPEN` option to restrict the port forwarding.
+> [!NOTE]  
+> By default, TCP forwarding is disabled in the server image.
+> To enable port forwarding,
+> you need to set the `SSHD_ALLOW_TCP_FORWARDING` environment variable
+> to `remote`, `local` or `all`, depending on the type(s) of port forwarding you want to allow.
+>
+> When enabling TCP forwarding,
+> also set `SSHD_PERMIT_LISTEN` or `SSHD_PERMIT_OPEN` option to restrict the port forwarding.
 
 ![SSH port forwarding cheatsheet](docs/ssh-port-forwarding.png)
 
@@ -137,6 +139,7 @@ docker run --name tunnel-server --rm -it --init \
   --user 12345:12345 \
   -e SERVER_ED25519_PRIVATE_KEY_BASE64="$(cat key1 | base64 -w 0)" \
   -e CLIENT_AUTHORIZED_KEYS="$(cat key2.pub)" \
+  -e SSHD_ALLOW_TCP_FORWARDING="remote" \
   -e SSHD_PERMIT_LISTEN="0.0.0.0:4444" \
   -p 2222:22 \
   -p 127.0.0.1:4444:4444 \
@@ -181,6 +184,7 @@ services:
     environment:
       SERVER_ED25519_PRIVATE_KEY_FILE: /run/secrets/key1
       CLIENT_AUTHORIZED_KEYS: ... value of key2.pub ...
+      SSHD_ALLOW_TCP_FORWARDING: remote
       SSHD_PERMIT_LISTEN: 0.0.0.0:4444
     ports:
       - 2222:22
