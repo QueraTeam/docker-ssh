@@ -51,7 +51,11 @@ else
 fi
 
 if [ -n "${SERVER_ED25519_PUBLIC_KEY}" ]; then
-    echo "[${SSH_HOSTNAME}]:${SSH_PORT:-22} ${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
+    if [ "${SSH_PORT:-22}" = "22" ]; then
+        echo "${SSH_HOSTNAME} ${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
+    else
+        echo "[${SSH_HOSTNAME}]:${SSH_PORT:-22} ${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
+    fi
     chmod 600 "${HOME}/.ssh/known_hosts"
 else
     echo "SERVER_ED25519_PUBLIC_KEY is not set. Exiting..."
