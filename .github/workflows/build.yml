@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -32,7 +33,7 @@ jobs:
           context: server
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/querateam/docker-ssh-tunnel/server:latest
+          tags: ghcr.io/querateam/docker-ssh/server:latest
 
       - name: Build and push the client image
         uses: docker/build-push-action@v6
@@ -40,4 +41,4 @@ jobs:
           context: client
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/querateam/docker-ssh-tunnel/client:latest
+          tags: ghcr.io/querateam/docker-ssh/client:latest
