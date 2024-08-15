@@ -20,9 +20,9 @@ fi
 # We make things work by creating a "fake" home directory, and using nss_wrapper
 # to "fake" /etc/passwd contents, so "openssh" thinks the user exists.
 # https://cwrap.org/nss_wrapper.html
-export HOME="/tmp/tunnel"
-echo "tunnel:x:$(id -u):$(id -g):Tunnel User:${HOME}:/bin/false" >/tmp/passwd
-echo "tunnel:x:$(id -g):tunnel" >/tmp/group
+export HOME="/tmp/sshuser"
+echo "sshuser:x:$(id -u):$(id -g):SSH User:${HOME}:/bin/false" >/tmp/passwd
+echo "sshuser:x:$(id -g):sshuser" >/tmp/group
 export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
 mkdir -p "${HOME}/.ssh"
 chmod -R 700 "${HOME}"
@@ -63,7 +63,7 @@ fi
 ################################
 printf "\
 Port ${SSH_PORT:-22}
-User tunnel
+User sshuser
 ServerAliveInterval ${SSH_SERVER_ALIVE_INTERVAL:-10}
 ServerAliveCountMax ${SSH_SERVER_ALIVE_COUNT_MAX:-3}
 ExitOnForwardFailure ${SSH_EXIT_ON_FORWARD_FAILURE:-yes}

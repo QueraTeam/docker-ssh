@@ -48,7 +48,6 @@ For more information, see the [`sshd_config(5)`](https://linux.die.net/man/5/ssh
 | `SSHD_X11_FORWARDING`                | X11Forwarding              | `no`              |
 | `SSHD_ALLOW_AGENT_FORWARDING`        | AllowAgentForwarding       | `no`              |
 | `SSHD_FORCE_COMMAND`                 | ForceCommand               | `/sbin/nologin`   |
-| `SSHD_ALLOW_USERS`                   | AllowUsers                 | `tunnel`          |
 
 ## Client image
 
