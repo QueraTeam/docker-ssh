@@ -107,6 +107,7 @@ to periodically run a command.
 | -------------------- | -------------------------------------------------------------- |
 | `SCHEDULE`           | A cron expression. Refer to the [cronexpr] doc for the syntax. |
 | `SCHEDULE_CMD`       | A command to run periodically.                                 |
+| `TZ`                 | The timezone to use for the schedule.                          |
 
 ## Key generation
 
