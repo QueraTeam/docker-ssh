@@ -139,7 +139,7 @@ also set `SSHD_PERMIT_LISTEN` or `SSHD_PERMIT_OPEN` option (or both) to restrict
 
 You can learn more about remote and local forwarding by reading `RemoteForward` and `LocalForward`
 sections in [`ssh_config(5)`].
-I have made a simple cheatsheet:
+Here is a simple cheatsheet:
 
 ![SSH port forwarding cheatsheet](docs/ssh-port-forwarding.png)
 
