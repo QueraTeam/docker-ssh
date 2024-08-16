@@ -261,6 +261,8 @@ services:
       SCHEDULE: "@daily"
       # Instead of "/data" path, use the module name "mydata".
       SCHEDULE_CMD: /usr/bin/rsync -z -e ssh /somefile rsync-server::mydata
+      # Specify the timezone to be used in the schedule
+      TZ: Asia/Tehran
     volumes:
       - ./somefile:/somefile:ro
 
