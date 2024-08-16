@@ -1,7 +1,10 @@
 FROM alpine:3.20
 
-# Install openssh-client and autossh
-RUN apk add --no-cache openssh-client autossh rsync supercronic tzdata nss_wrapper
+# Install common packages between server and client images
+RUN apk add --no-cache rsync tzdata nss_wrapper
+
+# Install client-specific packages
+RUN apk add --no-cache openssh-client autossh supercronic
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
