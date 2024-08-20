@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/client"
+    schedule:
+      interval: "daily"
