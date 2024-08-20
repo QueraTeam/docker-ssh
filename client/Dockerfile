@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.19
 
 # Install common packages between server and client images
 RUN apk add --no-cache rsync tzdata nss_wrapper
