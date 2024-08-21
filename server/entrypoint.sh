@@ -1,8 +1,12 @@
 #!/bin/sh
 
+log_with_timestamp() {
+    echo -e "$1" | awk '{ print strftime("[%Y-%m-%d %H:%M:%S%z]"), $0 }'
+}
+
 # Ensure the script is not run by the "root" user.
 if [ "$(id -u)" == "0" ]; then
-    echo "This image should not be run as the 'root' user. Exiting..."
+    log_with_timestamp "This image should not be run as the 'root' user. Exiting..."
     exit 1
 fi
 
@@ -18,6 +22,11 @@ export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_
 mkdir -p "${HOME}/sshd" "${HOME}/.ssh"
 chmod -R 700 "${HOME}"
 
+log_with_timestamp "\033[1;34mWelcome to docker-ssh/server!\033[0m"
+log_with_timestamp "\033[1;32m   Alpine: \033[0m $(cat /etc/alpine-release)"
+log_with_timestamp "\033[1;32m  OpenSSH: \033[0m $(sshd -V 2>&1)"
+log_with_timestamp "\033[1;32m    Rsync: \033[0m $(rsync --version | head -n 1)"
+
 ################################
 # setup host key               #
 ################################
@@ -26,18 +35,18 @@ if [ -n "${SERVER_ED25519_PRIVATE_KEY_FILE}" ]; then
         if [ "${SERVER_ED25519_PRIVATE_KEY_FILE}" != "${HOME}/sshd/ssh_host_ed25519_key" ]; then
             cp "${SERVER_ED25519_PRIVATE_KEY_FILE}" "${HOME}/sshd/ssh_host_ed25519_key"
             chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
+            log_with_timestamp "Installed host key from key file."
         fi
-        echo "Installed host key from key file."
     else
-        echo "'${SERVER_ED25519_PRIVATE_KEY_FILE}' is not readable. Exiting..."
+        log_with_timestamp "'${SERVER_ED25519_PRIVATE_KEY_FILE}' is not readable. Exiting..."
         exit 1
     fi
 elif [ -n "${SERVER_ED25519_PRIVATE_KEY_BASE64}" ]; then
     echo "${SERVER_ED25519_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/sshd/ssh_host_ed25519_key"
     chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
-    echo "Installed host key from env var."
+    log_with_timestamp "Installed host key from env var."
 else
-    echo "No private key provided. Exiting..."
+    log_with_timestamp "No private key provided. Exiting..."
     exit 1
 fi
 
@@ -50,7 +59,7 @@ fi
 # configure authorized_keys    #
 ################################
 if [ -z "${CLIENT_AUTHORIZED_KEYS}" ]; then
-    echo "CLIENT_AUTHORIZED_KEYS is not set. Exiting..."
+    log_with_timestamp "CLIENT_AUTHORIZED_KEYS is not set. Exiting..."
     exit 1
 else
     # Split the CLIENT_AUTHORIZED_KEYS variable by semicolon and add each to authorized_keys
@@ -92,4 +101,4 @@ AllowUsers sshuser
 ################################
 # Start sshd                   #
 ################################
-exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf"
+exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf" 2>&1 | awk '{ print strftime("[%Y-%m-%d %H:%M:%S%z]"), $0 }'
