@@ -72,12 +72,12 @@ SessionType ${SSH_SESSION_TYPE:-none}
 RequestTTY no
 " >"${HOME}/.ssh/config"
 if [ -n "${SSH_REMOTE_FORWARD}" ]; then
-    echo "${SSH_REMOTE_FORWARD}" | tr ';' '\n' | while IFS= read -r remote_forward; do
+    echo "${SSH_REMOTE_FORWARD}" | tr ',' '\n' | while IFS= read -r remote_forward; do
         echo "RemoteForward ${remote_forward}" >>"${HOME}/.ssh/config"
     done
 fi
 if [ -n "${SSH_LOCAL_FORWARD}" ]; then
-    echo "${SSH_LOCAL_FORWARD}" | tr ';' '\n' | while IFS= read -r local_forward; do
+    echo "${SSH_LOCAL_FORWARD}" | tr ',' '\n' | while IFS= read -r local_forward; do
         echo "LocalForward ${local_forward}" >>"${HOME}/.ssh/config"
     done
 fi

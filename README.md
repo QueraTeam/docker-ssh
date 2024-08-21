@@ -21,7 +21,7 @@ The server image supports the following environment variables:
 | `SERVER_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to the server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
 | `SERVER_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_ED25519_PRIVATE_KEY_FILE` (base64-encoded value).                                                 |
 | `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                                  |
-| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect. The keys should be separated by semicolons (`;`).                          |
+| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect. The keys should be separated by commas (`,`).                              |
 
 #### SSHD options
 
@@ -128,7 +128,7 @@ ssh-keygen -t ed25519 -N '' -C key2-$(date -I) -f key2
 You can define the SSH tunnel using `SSH_REMOTE_FORWARD` and `SSH_LOCAL_FORWARD`
 variables of the client image. They map to `RemoteForward` and `LocalForward` options in `ssh_config`.
 
-Each of these variables can have multiple port forwarding rules separated by semicolons (`;`).
+Each of these variables can have multiple port forwarding rules separated by commas (`,`).
 
 By default, TCP forwarding is disabled in the server image.
 To enable port forwarding,
