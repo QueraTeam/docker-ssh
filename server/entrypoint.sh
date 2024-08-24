@@ -1,7 +1,7 @@
 #!/bin/sh
 
 log_with_timestamp() {
-    echo -e "$1" | awk '{ print strftime("[%Y-%m-%d %H:%M:%S%z]"), $0 }'
+    echo -e "$1" | awk '{ "date -Iseconds" | getline d; print d, $0 }'
 }
 
 # Ensure the script is not run by the "root" user.
@@ -101,4 +101,4 @@ AllowUsers sshuser
 ################################
 # Start sshd                   #
 ################################
-exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf" 2>&1 | awk '{ print strftime("[%Y-%m-%d %H:%M:%S%z]"), $0 }'
+exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf" 2>&1 | awk '{ "date -Iseconds" | getline d; print d, $0 }'
