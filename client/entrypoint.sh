@@ -1,7 +1,7 @@
 #!/bin/sh
 
 log_with_timestamp() {
-    echo -e "$1" | awk '{ "date -Iseconds" | getline d; print d, $0 }'
+    echo -e "$1" | awk '{ "date -Iseconds" | getline d; print "["d"]", $0 }'
 }
 
 # Ensure the script is not run by the "root" user.
@@ -107,5 +107,5 @@ if [ -n "${SCHEDULE}" ]; then
     exec supercronic "${HOME}/crontab"
 else
     log_with_timestamp "Running $1..."
-    exec "$@" 2>&1 | awk '{ "date -Iseconds" | getline d; print d, $0 }'
+    exec "$@" 2>&1 | awk '{ "date -Iseconds" | getline d; print "["d"]", $0 }'
 fi
