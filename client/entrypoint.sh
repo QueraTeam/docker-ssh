@@ -107,5 +107,5 @@ if [ -n "${SCHEDULE}" ]; then
     exec supercronic "${HOME}/crontab"
 else
     log_with_timestamp "Running $1..."
-    exec "$@" 2>&1 | awk '{ "date -Iseconds" | getline d; print "["d"]", $0 }'
+    exec "$@" 2>&1 | awk '{ cmd="date -Iseconds"; cmd | getline d; close(cmd); print "["d"]", $0 }'
 fi

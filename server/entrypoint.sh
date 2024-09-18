@@ -101,4 +101,4 @@ AllowUsers sshuser
 ################################
 # Start sshd                   #
 ################################
-exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf" 2>&1 | awk '{ "date -Iseconds" | getline d; print "["d"]", $0 }'
+exec /usr/sbin/sshd -D -e -f "${HOME}/sshd/sshd.conf" 2>&1 | awk '{ cmd="date -Iseconds"; cmd | getline d; close(cmd); print "["d"]", $0 }'
