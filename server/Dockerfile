@@ -2,7 +2,7 @@
 FROM alpine:3.20
 
 # Install common packages between server and client images
-RUN apk add --no-cache rsync tzdata nss_wrapper
+RUN apk add --no-cache rsync tzdata nss_wrapper tini
 
 # Install server-specific packages
 RUN apk add --no-cache openssh-server
@@ -11,4 +11,4 @@ RUN apk add --no-cache openssh-server
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
