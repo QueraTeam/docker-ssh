@@ -23,6 +23,13 @@ The server image supports the following environment variables:
 | `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                                  |
 | `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect. Multiple keys should be separated by newlines.                             |
 
+#### SSH user
+
+| Environment Variable | Description                               | Default   |
+| -------------------- | ----------------------------------------- | --------- |
+| `SSH_USER`           | The username to use for SSH connections.  | `sshuser` |
+
+
 #### SSHD options
 
 For more information, see the [`sshd_config(5)`] manual.
@@ -70,16 +77,17 @@ The client image supports the following environment variables:
 
 For more information, see the [`ssh_config(5)`] manual.
 
-| Environment Variable          | ssh_config Option    | Default |
-| ----------------------------- | -------------------- | ------- |
-| `SSH_HOSTNAME` _required_     | Hostname             | -       |
-| `SSH_PORT`                    | Port                 | `22`    |
-| `SSH_REMOTE_FORWARD`          | RemoteForward        | -       |
-| `SSH_LOCAL_FORWARD`           | LocalForward         | -       |
-| `SSH_SERVER_ALIVE_INTERVAL`   | ServerAliveInterval  | `10`    |
-| `SSH_SERVER_ALIVE_COUNT_MAX`  | ServerAliveCountMax  | `3`     |
-| `SSH_EXIT_ON_FORWARD_FAILURE` | ExitOnForwardFailure | `yes`   |
-| `SSH_SESSION_TYPE`            | SessionType          | `none`  |
+| Environment Variable          | ssh_config Option    | Default   |
+| ----------------------------- | -------------------- | --------- |
+| `SSH_HOSTNAME` _required_     | Hostname             | -         |
+| `SSH_PORT`                    | Port                 | `22`      |
+| `SSH_USER`                    | User                 | `sshuser` |
+| `SSH_REMOTE_FORWARD`          | RemoteForward        | -         |
+| `SSH_LOCAL_FORWARD`           | LocalForward         | -         |
+| `SSH_SERVER_ALIVE_INTERVAL`   | ServerAliveInterval  | `10`      |
+| `SSH_SERVER_ALIVE_COUNT_MAX`  | ServerAliveCountMax  | `3`       |
+| `SSH_EXIT_ON_FORWARD_FAILURE` | ExitOnForwardFailure | `yes`     |
+| `SSH_SESSION_TYPE`            | SessionType          | `none`    |
 
 #### Autossh options
 

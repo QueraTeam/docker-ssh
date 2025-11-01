@@ -10,14 +10,16 @@ if [ "$(id -u)" == "0" ]; then
     exit 1
 fi
 
+USERNAME="${SSH_USER:-sshuser}"
+
 # We want to be able to run as an arbitrary user via `--user` on `docker run`.
 # So we don't depend on the existence of a real user and a home directory.
 # We make things work by creating a "fake" home directory, and using nss_wrapper
 # to "fake" /etc/passwd contents, so "openssh" thinks the user exists.
 # https://cwrap.org/nss_wrapper.html
-export HOME="/tmp/sshuser"
-echo "sshuser:x:$(id -u):$(id -g):SSH User:${HOME}:/bin/sh" >/tmp/passwd
-echo "sshuser:x:$(id -g):sshuser" >/tmp/group
+export HOME="/tmp/${USERNAME}"
+echo "${USERNAME}:x:$(id -u):$(id -g):SSH User:${HOME}:/bin/sh" >/tmp/passwd
+echo "${USERNAME}:x:$(id -g):${USERNAME}" >/tmp/group
 export LD_PRELOAD=/usr/lib/libnss_wrapper.so NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
 mkdir -p "${HOME}/sshd" "${HOME}/.ssh"
 chmod -R 700 "${HOME}"
@@ -92,7 +94,7 @@ AllowStreamLocalForwarding ${SSHD_ALLOW_STREAM_LOCAL_FORWARDING:-no}
 X11Forwarding ${SSHD_X11_FORWARDING:-no}
 AllowAgentForwarding ${SSHD_ALLOW_AGENT_FORWARDING:-no}
 ForceCommand ${SSHD_FORCE_COMMAND:-"/sbin/nologin"}
-AllowUsers sshuser
+AllowUsers ${USERNAME}
 " >"${HOME}/sshd/sshd.conf"
 
 ################################
