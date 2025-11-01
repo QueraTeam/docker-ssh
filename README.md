@@ -16,12 +16,12 @@ The server image supports the following environment variables:
 
 #### SSH keys
 
-| Environment Variable                              | Description                                                                                                              |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `SERVER_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to the server's host private key (ed25519). The client needs to have the corresponding public key in `known_hosts`. |
-| `SERVER_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_ED25519_PRIVATE_KEY_FILE` (base64-encoded value).                                                 |
-| `SERVER_ED25519_PUBLIC_KEY`                       | The server's host public key (ed25519).                                                                                  |
-| `CLIENT_AUTHORIZED_KEYS` <br> _required_          | The client public keys authorized to connect. Multiple keys should be separated by newlines.                             |
+| Environment Variable                      | Description                                                                                                    |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `SERVER_PRIVATE_KEY_FILE` <br> _required_ | Path to the server's host private key. The client needs to have the corresponding public key in `known_hosts`. |
+| `SERVER_PRIVATE_KEY_BASE64`               | Alternative to `SERVER_PRIVATE_KEY_FILE` (base64-encoded value).                                               |
+| `SERVER_PUBLIC_KEY`                       | The server's host public key.                                                                                  |
+| `CLIENT_AUTHORIZED_KEYS` <br> _required_  | The client public keys authorized to connect. Multiple keys should be separated by newlines.                   |
 
 #### SSH user
 
@@ -67,11 +67,11 @@ The client image supports the following environment variables:
 
 #### SSH keys
 
-| Environment Variable                              | Description                                                                      |
-| ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `SERVER_ED25519_PUBLIC_KEY` <br> _required_       | The server's host public key (ed25519). This key will be added to `known_hosts`. |
-| `CLIENT_ED25519_PRIVATE_KEY_FILE` <br> _required_ | Path to the client's SSH private key.                                            |
-| `CLIENT_ED25519_PRIVATE_KEY_BASE64`               | Alternative to `CLIENT_ED25519_PRIVATE_KEY_FILE` (base64-encoded value)          |
+| Environment Variable                      | Description                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `SERVER_PUBLIC_KEY` <br> _required_       | The server's host public key. This key will be added to `known_hosts`. |
+| `CLIENT_PRIVATE_KEY_FILE` <br> _required_ | Path to the client's SSH private key.                                  |
+| `CLIENT_PRIVATE_KEY_BASE64`               | Alternative to `CLIENT_PRIVATE_KEY_FILE` (base64-encoded value)        |
 
 #### SSH options
 
@@ -184,7 +184,7 @@ services:
     secrets:
       - key1
     environment:
-      SERVER_ED25519_PRIVATE_KEY_FILE: /run/secrets/key1
+      SERVER_PRIVATE_KEY_FILE: /run/secrets/key1
       CLIENT_AUTHORIZED_KEYS: |
         ... value of key2.pub ...
         ... other key ...
@@ -198,8 +198,8 @@ services:
     secrets:
       - key2
     environment:
-      CLIENT_ED25519_PRIVATE_KEY_FILE: /run/secrets/key2
-      SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
+      CLIENT_PRIVATE_KEY_FILE: /run/secrets/key2
+      SERVER_PUBLIC_KEY: ... value of key1.pub ...
       SSH_HOSTNAME: tunnel-server
       SSH_REMOTE_FORWARD: 127.0.0.1:4444 127.0.0.1:6666
 
@@ -266,7 +266,7 @@ services:
     secrets:
       - key1
     environment:
-      SERVER_ED25519_PRIVATE_KEY_FILE: /run/secrets/key1
+      SERVER_PRIVATE_KEY_FILE: /run/secrets/key1
       CLIENT_AUTHORIZED_KEYS: |
         ... value of key2.pub ...
         ... other key ...
@@ -282,8 +282,8 @@ services:
     secrets:
       - key2
     environment:
-      CLIENT_ED25519_PRIVATE_KEY_FILE: /run/secrets/key2
-      SERVER_ED25519_PUBLIC_KEY: ... value of key1.pub ...
+      CLIENT_PRIVATE_KEY_FILE: /run/secrets/key2
+      SERVER_PUBLIC_KEY: ... value of key1.pub ...
       SSH_SESSION_TYPE: default
       SSH_HOSTNAME: rsync-server
       # Run once a day at midnight.

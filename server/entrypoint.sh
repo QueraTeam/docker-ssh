@@ -32,29 +32,34 @@ log "\033[1;32m    Rsync: \033[0m $(rsync --version | head -n 1)"
 ################################
 # setup host key               #
 ################################
-if [ -n "${SERVER_ED25519_PRIVATE_KEY_FILE}" ]; then
-    if [ -r "${SERVER_ED25519_PRIVATE_KEY_FILE}" ]; then
-        if [ "${SERVER_ED25519_PRIVATE_KEY_FILE}" != "${HOME}/sshd/ssh_host_ed25519_key" ]; then
-            cp "${SERVER_ED25519_PRIVATE_KEY_FILE}" "${HOME}/sshd/ssh_host_ed25519_key"
-            chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
+# Variables with `_ED25519` in their names are kept for backward compatibility.
+SERVER_PRIVATE_KEY_FILE="${SERVER_PRIVATE_KEY_FILE:-${SERVER_ED25519_PRIVATE_KEY_FILE}}"
+SERVER_PRIVATE_KEY_BASE64="${SERVER_PRIVATE_KEY_BASE64:-${SERVER_ED25519_PRIVATE_KEY_BASE64}}"
+SERVER_PUBLIC_KEY="${SERVER_PUBLIC_KEY:-${SERVER_ED25519_PUBLIC_KEY}}"
+
+if [ -n "${SERVER_PRIVATE_KEY_FILE}" ]; then
+    if [ -r "${SERVER_PRIVATE_KEY_FILE}" ]; then
+        if [ "${SERVER_PRIVATE_KEY_FILE}" != "${HOME}/sshd/server_key" ]; then
+            cp "${SERVER_PRIVATE_KEY_FILE}" "${HOME}/sshd/server_key"
+            chmod 600 "${HOME}/sshd/server_key"
             log "Installed host key from key file."
         fi
     else
-        log "'${SERVER_ED25519_PRIVATE_KEY_FILE}' is not readable. Exiting..."
+        log "'${SERVER_PRIVATE_KEY_FILE}' is not readable. Exiting..."
         exit 1
     fi
-elif [ -n "${SERVER_ED25519_PRIVATE_KEY_BASE64}" ]; then
-    echo "${SERVER_ED25519_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/sshd/ssh_host_ed25519_key"
-    chmod 600 "${HOME}/sshd/ssh_host_ed25519_key"
+elif [ -n "${SERVER_PRIVATE_KEY_BASE64}" ]; then
+    echo "${SERVER_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/sshd/server_key"
+    chmod 600 "${HOME}/sshd/server_key"
     log "Installed host key from env var."
 else
     log "No private key provided. Exiting..."
     exit 1
 fi
 
-if [ -n "${SERVER_ED25519_PUBLIC_KEY}" ]; then
-    echo "${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/sshd/ssh_host_ed25519_key.pub"
-    chmod 644 "${HOME}/sshd/ssh_host_ed25519_key.pub"
+if [ -n "${SERVER_PUBLIC_KEY}" ]; then
+    echo "${SERVER_PUBLIC_KEY}" >"${HOME}/sshd/server_key.pub"
+    chmod 644 "${HOME}/sshd/server_key.pub"
 fi
 
 ################################
@@ -73,7 +78,7 @@ fi
 ################################
 printf "\
 AuthorizedKeysFile .ssh/authorized_keys
-HostKey ${HOME}/sshd/ssh_host_ed25519_key
+HostKey ${HOME}/sshd/server_key
 PidFile none
 Port ${SSHD_PORT:-22}
 PermitRootLogin ${SSHD_PERMIT_ROOT_LOGIN:-no}

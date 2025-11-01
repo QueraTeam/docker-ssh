@@ -37,35 +37,40 @@ fi
 ################################
 # setup keys                   #
 ################################
-if [ -n "${CLIENT_ED25519_PRIVATE_KEY_FILE}" ]; then
-    if [ -r "${CLIENT_ED25519_PRIVATE_KEY_FILE}" ]; then
-        if [ "${CLIENT_ED25519_PRIVATE_KEY_FILE}" != "${HOME}/.ssh/id_ed25519" ]; then
-            cp "${CLIENT_ED25519_PRIVATE_KEY_FILE}" "${HOME}/.ssh/id_ed25519"
-            chmod 600 "${HOME}/.ssh/id_ed25519"
+# Variables with `_ED25519` in their names are kept for backward compatibility.
+CLIENT_PRIVATE_KEY_FILE="${CLIENT_PRIVATE_KEY_FILE:-${CLIENT_ED25519_PRIVATE_KEY_FILE}}"
+CLIENT_PRIVATE_KEY_BASE64="${CLIENT_PRIVATE_KEY_BASE64:-${CLIENT_ED25519_PRIVATE_KEY_BASE64}}"
+SERVER_PUBLIC_KEY="${SERVER_PUBLIC_KEY:-${SERVER_ED25519_PUBLIC_KEY}}"
+
+if [ -n "${CLIENT_PRIVATE_KEY_FILE}" ]; then
+    if [ -r "${CLIENT_PRIVATE_KEY_FILE}" ]; then
+        if [ "${CLIENT_PRIVATE_KEY_FILE}" != "${HOME}/.ssh/client_key" ]; then
+            cp "${CLIENT_PRIVATE_KEY_FILE}" "${HOME}/.ssh/client_key"
+            chmod 600 "${HOME}/.ssh/client_key"
             log "Installed private key from key file."
         fi
     else
-        log "'${CLIENT_ED25519_PRIVATE_KEY_FILE}' is not readable. Exiting..."
+        log "'${CLIENT_PRIVATE_KEY_FILE}' is not readable. Exiting..."
         exit 1
     fi
-elif [ -n "${CLIENT_ED25519_PRIVATE_KEY_BASE64}" ]; then
-    echo "${CLIENT_ED25519_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/.ssh/id_ed25519"
-    chmod 600 "${HOME}/.ssh/id_ed25519"
+elif [ -n "${CLIENT_PRIVATE_KEY_BASE64}" ]; then
+    echo "${CLIENT_PRIVATE_KEY_BASE64}" | base64 -d >"${HOME}/.ssh/client_key"
+    chmod 600 "${HOME}/.ssh/client_key"
     log "Installed private key from env var."
 else
     log "No private key provided. Exiting..."
     exit 1
 fi
 
-if [ -n "${SERVER_ED25519_PUBLIC_KEY}" ]; then
+if [ -n "${SERVER_PUBLIC_KEY}" ]; then
     if [ "${SSH_PORT:-22}" = "22" ]; then
-        echo "${SSH_HOSTNAME} ${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
+        echo "${SSH_HOSTNAME} ${SERVER_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
     else
-        echo "[${SSH_HOSTNAME}]:${SSH_PORT:-22} ${SERVER_ED25519_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
+        echo "[${SSH_HOSTNAME}]:${SSH_PORT:-22} ${SERVER_PUBLIC_KEY}" >"${HOME}/.ssh/known_hosts"
     fi
     chmod 600 "${HOME}/.ssh/known_hosts"
 else
-    log "SERVER_ED25519_PUBLIC_KEY is not set. Exiting..."
+    log "Server public key is not set. Exiting..."
     exit 1
 fi
 
@@ -76,6 +81,7 @@ printf "\
 Hostname ${SSH_HOSTNAME}
 Port ${SSH_PORT:-22}
 User ${USERNAME}
+IdentityFile ${HOME}/.ssh/client_key
 ServerAliveInterval ${SSH_SERVER_ALIVE_INTERVAL:-10}
 ServerAliveCountMax ${SSH_SERVER_ALIVE_COUNT_MAX:-3}
 ExitOnForwardFailure ${SSH_EXIT_ON_FORWARD_FAILURE:-yes}
